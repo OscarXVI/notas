@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.notas.basededatos.model.Note;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +35,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
 
         // create notes table
-        db.execSQL(nota.CREATE_TABLE);
+        db.execSQL(Note.CREATE_TABLE);
     }
 
     // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + nota.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Note.TABLE_NAME);
 
         // Create tables again
         onCreate(db);
@@ -53,10 +55,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         // `id` and `timestamp` will be inserted automatically.
         // no need to add them
-        values.put(nota.COLUMN_NOTE, note);
+        values.put(Note.COLUMN_NOTE, note);
 
         // insert row
-        long id = db.insert(nota.TABLE_NAME, null, values);
+        long id = db.insert(Note.TABLE_NAME, null, values);
 
         // close db connection
         db.close();
@@ -64,23 +66,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // return newly inserted row id
         return id;
     }
-    public nota getNote(long id) {
+    public Note getNote(long id) {
         // get readable database as we are not inserting anything
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(nota.TABLE_NAME,
-                new String[]{nota.COLUMN_ID, nota.COLUMN_NOTE, nota.COLUMN_TIMESTAMP},
-                nota.COLUMN_ID + "=?",
+        Cursor cursor = db.query(Note.TABLE_NAME,
+                new String[]{Note.COLUMN_ID, Note.COLUMN_NOTE, Note.COLUMN_TIMESTAMP},
+                Note.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
 
         if (cursor != null)
             cursor.moveToFirst();
 
         // prepare note object
-        nota note = new nota(
-                cursor.getInt(cursor.getColumnIndex(nota.COLUMN_ID)),
-                cursor.getString(cursor.getColumnIndex(nota.COLUMN_NOTE)),
-                cursor.getString(cursor.getColumnIndex(nota.COLUMN_TIMESTAMP)));
+        Note note = new Note(
+                cursor.getInt(cursor.getColumnIndex(Note.COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE)),
+                cursor.getString(cursor.getColumnIndex(Note.COLUMN_TIMESTAMP)));
 
         // close the db connection
         cursor.close();
@@ -88,12 +90,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return note;
     }
 
-    public List<nota> getAllNotes() {
-        List<nota> notes = new ArrayList<>();
+    public List<Note> getAllNotes() {
+        List<Note> notes = new ArrayList<>();
 
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + nota.TABLE_NAME + " ORDER BY " +
-                nota.COLUMN_TIMESTAMP + " DESC";
+        String selectQuery = "SELECT  * FROM " + Note.TABLE_NAME + " ORDER BY " +
+                Note.COLUMN_TIMESTAMP + " DESC";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -101,10 +103,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                nota note = new nota();
-                note.setId(cursor.getInt(cursor.getColumnIndex(nota.COLUMN_ID)));
-                note.setNote(cursor.getString(cursor.getColumnIndex(nota.COLUMN_NOTE)));
-                note.setTimestamp(cursor.getString(cursor.getColumnIndex(nota.COLUMN_TIMESTAMP)));
+                Note note = new Note();
+                note.setId(cursor.getInt(cursor.getColumnIndex(Note.COLUMN_ID)));
+                note.setNote(cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE)));
+                note.setTimestamp(cursor.getString(cursor.getColumnIndex(Note.COLUMN_TIMESTAMP)));
 
                 notes.add(note);
             } while (cursor.moveToNext());
@@ -118,7 +120,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public int getNotesCount() {
-        String countQuery = "SELECT  * FROM " + nota.TABLE_NAME;
+        String countQuery = "SELECT  * FROM " + Note.TABLE_NAME;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
 
@@ -129,19 +131,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // return count
         return count;
     }
-    public int updateNote(nota note) {
+    public int updateNote(Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(nota.COLUMN_NOTE, note.getNote());
+        values.put(Note.COLUMN_NOTE, note.getNote());
 
         // updating row
-        return db.update(nota.TABLE_NAME, values, nota.COLUMN_ID + " = ?",
+        return db.update(Note.TABLE_NAME, values, Note.COLUMN_ID + " = ?",
                 new String[]{String.valueOf(note.getId())});
     }
-    public void deleteNote(nota note) {
+    public void deleteNote(Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(nota.TABLE_NAME, nota.COLUMN_ID + " = ?",
+        db.delete(Note.TABLE_NAME, Note.COLUMN_ID + " = ?",
                 new String[]{String.valueOf(note.getId())});
         db.close();
     }
